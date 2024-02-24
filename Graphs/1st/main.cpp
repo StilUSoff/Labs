@@ -1,249 +1,178 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <string>
-#include <algorithm>
-#include <random>
-#include <cstdio>
-#include<map>
+#include <vector>
+#include <map>
 
 using namespace std;
 
-// Функция для генерации случайного символа из алфавита
-char getRandomChar() {
-    string alphabet = "NnOoPpRrSsTt 0123456789$."; //НнОоПпРрСсТт
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> dis(0, alphabet.size() - 1);
-    return alphabet[dis(gen)];
-}
-
-// Function to generate random text
-string generateRandomText(int length) {
-    string text;
-    text.reserve(length);
-    for (int i = 0; i < length; ++i) {
-        text += getRandomChar();
-    }
-    return text;
-}
-
-vector<int> encodeLZW(const string& text) {
-    vector<int> encoded;
+// Функция для кодирования алгоритмом LZW
+vector<int> encodeLZW(const string& input) {
     map<string, int> dictionary;
+    vector<int> encoded;
     int dictSize = 256;
+
+    for (int i = 0; i < 256; ++i) {
+        dictionary[string(1, i)] = i;
+    }
+
     string current;
-    for (char c : text) {
-        string temp = current + c;
-        if (dictionary.count(temp)) {
-            current = temp;
+    for (char c : input) {
+        string combined = current + c;
+        if (dictionary.find(combined) != dictionary.end()) {
+            current = combined;
         } else {
             encoded.push_back(dictionary[current]);
-            dictionary[temp] = dictSize++;
+            dictionary[combined] = dictSize++;
             current = string(1, c);
         }
     }
+
     if (!current.empty()) {
         encoded.push_back(dictionary[current]);
     }
+
     return encoded;
 }
 
+// Функция для декодирования алгоритмом LZW
 string decodeLZW(const vector<int>& encoded) {
-    if (encoded.empty()) return "";
-
-    string decoded;
     map<int, string> dictionary;
+    string decoded;
     int dictSize = 256;
-    for (int i = 0; i < dictSize; ++i) {
+
+    for (int i = 0; i < 256; ++i) {
         dictionary[i] = string(1, i);
     }
 
-    int prevCode = encoded[0];
-    string entry = dictionary[prevCode];
-    decoded += entry;
-    for (size_t i = 1; i < encoded.size(); ++i) {
-        int code = encoded[i];
-        if (dictionary.find(code) != dictionary.end()) {
-            entry = dictionary[code];
-        } else if (code == dictSize) {
-            entry = dictionary[prevCode] + dictionary[prevCode][0];
+    string current(1, encoded[0]);
+    string next;
+    decoded = current;
+
+    for (int i = 1; i < encoded.size(); ++i) {
+        if (dictionary.find(encoded[i]) != dictionary.end()) {
+            next = dictionary[encoded[i]];
+        } else if (encoded[i] == dictSize) {
+            next = current + current[0];
         } else {
-            throw "Error in decoding with LZW algorithm: Invalid code.";
+            throw "Неверный входной код";
         }
-        decoded += entry;
-        if (dictSize < 4096) { // Limit the size of the dictionary
-            dictionary[dictSize++] = dictionary[prevCode] + entry[0];
-        }
-        prevCode = code;
+
+        decoded += next;
+        dictionary[dictSize++] = current + next[0];
+        current = next;
     }
 
     return decoded;
 }
 
-
-// Function to encode text using the RLE algorithm
-string encodeRLE(const string& text) {
-    string encoded;
+// Функция для кодирования алгоритмом RLE
+vector<pair<char, int>> encodeRLE(const string& input) {
+    vector<pair<char, int>> encoded;
     int count = 1;
-    for (size_t i = 1; i <= text.size(); ++i) {
-        if (i == text.size() || text[i] != text[i - 1]) {
-            encoded += to_string(count) + text[i - 1];
-            count = 1;
+    char current = input[0];
+
+    for (int i = 1; i < input.length(); ++i) {
+        if (input[i] == current) {
+            count++;
         } else {
-            ++count;
+            encoded.push_back(make_pair(current, count));
+            current = input[i];
+            count = 1;
         }
     }
+
+    encoded.push_back(make_pair(current, count));
+
     return encoded;
 }
 
-// Function to decode text using the RLE algorithm
-string decodeRLE(const string& encoded) {
+// Функция для декодирования алгоритмом RLE
+string decodeRLE(const vector<pair<char, int>>& encoded) {
     string decoded;
-    for (size_t i = 0; i < encoded.size(); i += 2) {
-        if (!isdigit(encoded[i])) {
-            return "Error in decoding with RLE algorithm: Invalid input format.";
-        }
-        int count = encoded[i] - '0';
-        char c = encoded[i + 1];
-        decoded.append(count, c);
+
+    for (auto p : encoded) {
+        decoded.append(p.second, p.first);
     }
+
     return decoded;
 }
 
+// Функция для генерации случайной строки из указанного алфавита
+string generateRandomString(int length, const string& alphabet) {
+    string result;
+    int alphabetSize = alphabet.length();
+    for (int i = 0; i < length; ++i) {
+        result += alphabet[rand() % alphabetSize];
+    }
+    return result;
+}
+
 int main() {
-    // Generating random text
-    int textLength = 10000;
-    string originalText = generateRandomText(textLength);
+    srand(time(nullptr));
 
-    // (a) Encoding text with the LZW algorithm
+    const string alphabet = "нопрст 0123456789$.";
 
-    // Calculating encoding cost
+    // Генерация случайной строки
+    string input = generateRandomString(10000, alphabet);
 
-    ofstream dictionaryFile("textfile.txt");
-    if (!dictionaryFile.is_open()) {
-        cerr << "Failed to open file for encoding dictionary." << endl;
-        return 1; // Return non-zero code to indicate error
-    }
-    dictionaryFile << originalText << endl;
-    
-    vector<int> encodedText = encodeLZW(originalText);
-
-    int originalSize = originalText.size() * 8; // Number of bits in original text
-    int encodedSize = encodedText.size() * 12; // Assuming each LZW code takes 12 bits
-    double compressionRateLZW = (double)encodedSize / originalSize;
-    cout << "(a) Encoding cost with LZW algorithm: " << compressionRateLZW << endl;
-
-
-    // Decoding text with the LZW algorithm
-    string decodedTextLZW = decodeLZW(encodedText);
-
-    // Checking if decoding was successful
-    if (originalText == decodedTextLZW) {
-        cout << "Decoding with LZW algorithm was successful." << endl;
+    // Запись строки в файл
+    ofstream outFile("input.txt");
+    if (outFile.is_open()) {
+        outFile << input;
+        outFile.close();
     } else {
-        cout << "Error in decoding with LZW algorithm." << endl;
+        cout << "Не удалось открыть файл для записи." << endl;
+        return 1;
     }
 
+    // Кодирование и декодирование алгоритмом LZW
+    vector<int> encodedLZW = encodeLZW(input);
+    string decodedLZW = decodeLZW(encodedLZW);
 
-
-
-
-
-
-
-
-    cout << endl;
-    cout << endl;
-    cout << "ORIGINAL: " << originalText.substr(0, 30) << endl;
-    cout << endl;
-    cout << endl;
-    cout << "DECODED: " << decodedTextLZW.substr(0, 30) << endl;
-    cout << endl;
-    cout << endl;
-
-
-
-
-
-
-
-    // Calculating LZW compression ratio
-    compressionRateLZW = (double)originalSize / encodedSize;
-    cout << "(a) Compression ratio with LZW algorithm: " << compressionRateLZW << endl;
-
-    // (b) Encoding text with the RLE algorithm
-    string encodedTextRLE = encodeRLE(originalText);
-
-    // Calculating RLE compression ratio
-    double compressionRateRLE = (double)encodedTextRLE.size() * 8 / originalSize;
-    cout << "(b) Compression ratio with RLE algorithm: " << compressionRateRLE << endl;
-
-    // Decoding text with the RLE algorithm
-    string decodedTextRLE = decodeRLE(encodedTextRLE);
-
-    // Checking if decoding was successful
-    if (originalText == decodedTextRLE) {
-        cout << "Decoding with RLE algorithm was successful." << endl;
-    } else {
-        cout << "Error in decoding with RLE algorithm." << endl;
+    // Проверка корректности декодирования LZW
+    if (input != decodedLZW) {
+        cout << "Ошибка декодирования LZW." << endl;
+        return 1;
     }
 
-    // (c) Comparing the efficiency of LZW + RLE and RLE + LZW encoding
-    // Encoding text with the LZW algorithm followed by RLE
-    vector<int> encodedTextLZW = encodeLZW(originalText);
+    // Кодирование и декодирование алгоритмом RLE
+    vector<pair<char, int>> encodedRLE = encodeRLE(input);
+    string decodedRLE = decodeRLE(encodedRLE);
 
-    string encodedTextLZW_RLE = encodeRLE(decodeLZW(encodedTextLZW));
-
-    // Checking if decoding was successful
-    string decodedTextLZW_RLE = decodeRLE(encodedTextLZW_RLE);
-    if (originalText == decodedTextLZW_RLE) {
-        cout << "Decoding with LZW + RLE algorithm was successful." << endl;
-    } else {
-        cout << "Error in decoding with LZW + RLE algorithm." << endl;
+    // Проверка корректности декодирования RLE
+    if (input != decodedRLE) {
+        cout << "Ошибка декодирования RLE." << endl;
+        return 1;
     }
 
-    // LZW + RLE compression ratio
-    int encodedSizeLZW_RLE = encodedTextLZW_RLE.size() * 8; // Assuming each symbol-count pair in RLE is encoded in 8 bits
-    double compressionRateLZW_RLE = (double)encodedSizeLZW_RLE / originalSize;
+    // Вывод коэффициента сжатия для каждого метода
+    cout << "Коэффициент сжатия LZW: " << static_cast<double>(input.length()) / encodedLZW.size() << endl;
+    cout << "Коэффициент сжатия RLE: " << static_cast<double>(input.length()) / encodedRLE.size() << endl;
 
-    // Encoding text with RLE followed by LZW
-    string encodedTextRLE_LZW = encodeRLE(originalText);
-    vector<int> encodedTextRLE_LZW_LZW = encodeLZW(encodedTextRLE_LZW);
+    // Кодирование и декодирование алгоритмом RLE + LZW
+    vector<pair<char, int>> encodedRLERLE = encodeRLE(decodedLZW);
+    string decodedRLERLE = decodeLZW(encodeRLE(input));
 
-    // Checking if decoding was successful
-    string decodedTextRLE_LZW = decodeLZW(encodedTextRLE_LZW_LZW);
-    string decodedTextRLE_LZW_RLE = decodeRLE(decodedTextRLE_LZW);
-    if (originalText == decodedTextRLE_LZW_RLE) {
-        cout << "Decoding with RLE + LZW algorithm was successful." << endl;
-    } else {
-        cout << "Error in decoding with RLE + LZW algorithm." << endl;
+    // Проверка корректности декодирования RLE + LZW
+    if (input != decodedRLERLE) {
+        cout << "Ошибка декодирования RLE + LZW." << endl;
+        return 1;
     }
 
-    // RLE + LZW compression ratio
-    int encodedSizeRLE_LZW = encodedTextRLE_LZW_LZW.size() * 12; // Assuming each LZW code takes 12 bits
-    double compressionRateRLE_LZW = (double)encodedSizeRLE_LZW / originalSize;
+    // Кодирование и декодирование алгоритмом LZW + RLE
+    vector<int> encodedLZWRLE = encodeLZW(decodedRLE);
+    string decodedLZWRLE = decodeRLE(encodedLZWRLE);
 
-    cout << "(c) Comparing encoding efficiency:" << endl;
-    cout << "Compression ratio of LZW + RLE: " << compressionRateLZW_RLE << endl;
-    cout << "Compression ratio of RLE + LZW: " << compressionRateRLE_LZW << endl;
-
-    if (compressionRateLZW_RLE < compressionRateRLE_LZW) {
-        cout << "LZW + RLE is more efficient." << endl;
-    } else if (compressionRateLZW_RLE > compressionRateRLE_LZW) {
-        cout << "RLE + LZW is more efficient." << endl;
-    } else {
-        cout << "Both methods have the same efficiency." << endl;
+    // Проверка корректности декодирования LZW + RLE
+    if (input != decodedLZWRLE) {
+        cout << "Ошибка декодирования LZW + RLE." << endl;
+        return 1;
     }
 
-    // Removing the file
-    if (remove("textfile.txt") != 0) {
-        cerr << "Error deleting the file." << endl;
-    } else {
-        cout << "File dictionary.txt deleted successfully." << endl;
-    }
-
-    dictionaryFile.close();
+    // Вывод коэффициента сжатия для двухступенчатого кодирования
+    cout << "Коэффициент сжатия RLE + LZW: " << static_cast<double>(input.length()) / encodedRLERLE.size() << endl;
+    cout << "Коэффициент сжатия LZW + RLE: " << static_cast<double>(input.length()) / encodedLZWRLE.size() << endl;
 
     return 0;
 }
