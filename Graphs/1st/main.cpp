@@ -3,8 +3,28 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <utility>
 
 using namespace std;
+
+vector<pair<char, int> > vectorize(const vector<int>& encoded) {
+    vector<pair<char, int> > result;
+    int count = 1;
+    char current = static_cast<char>(encoded[0]);
+
+    for (int i = 1; i < encoded.size(); ++i) {
+        if (encoded[i] == encoded[i - 1]) {
+            ++count;
+        } else {
+            result.push_back(make_pair(current, count));
+            count = 1;
+            current = static_cast<char>(encoded[i]);
+        }
+    }
+
+    result.push_back(make_pair(current, count));
+    return result;
+}
 
 // Функция для кодирования алгоритмом LZW
 vector<int> encodeLZW(const string& input) {
@@ -111,7 +131,7 @@ string generateRandomString(int length, const string& alphabet) {
 int main() {
     srand(time(nullptr));
 
-    const string alphabet = "нопрст 0123456789$.";
+    const string alphabet = "NnOoPpRrSsTt 0123456789$.";
 
     // Генерация случайной строки
     string input = generateRandomString(10000, alphabet);
@@ -151,18 +171,33 @@ int main() {
     cout << "Коэффициент сжатия RLE: " << static_cast<double>(input.length()) / encodedRLE.size() << endl;
 
     // Кодирование и декодирование алгоритмом RLE + LZW
-    vector<pair<char, int> > encodedRLERLE = encodeRLE(decodedLZW);
-    string decodedRLERLE = decodeRLE(encodedRLERLE);
+
+    // Преобразование закодированных данных RLE в вектор символов
+    vector<char> rleData;
+    for (auto& p : encodedRLE) {
+        rleData.insert(rleData.end(), p.second, p.first);
+    }
+
+    // Кодирование закодированных данных RLE методом LZW
+    vector<int> encodedRLELZW = encodeLZW(string(rleData.begin(), rleData.end()));
+
+    string decodedRLELZW_1 = decodeLZW(encodedRLELZW);
+    string decodedRLELZW = decodeRLE(decodedRLELZW_1);
 
     // Проверка корректности декодирования RLE + LZW
-    if (input != decodedRLERLE) {
+    if (input != decodedRLELZW) {
         cout << "Ошибка декодирования RLE + LZW." << endl;
         return 1;
     }
 
     // Кодирование и декодирование алгоритмом LZW + RLE
-    vector<int> encodedLZWRLE = encodeLZW(decodedRLE);
-    string decodedLZWRLE = decodeLZW(encodedLZWRLE);
+
+    // Кодирование закодированных данных алгоритмом LZW методом RLE
+    
+    vector<pair<char, int> > encodedLZWRLE = encodeRLE(vectorize(encodedLZW));
+
+    string decodedLZWRLE_1 = decodeRLE(encodedLZWRLE);
+    string decodedLZWRLE = decodeLZW(decodedLZWRLE_1);
 
     // Проверка корректности декодирования LZW + RLE
     if (input != decodedLZWRLE) {
@@ -171,7 +206,7 @@ int main() {
     }
 
     // Вывод коэффициента сжатия для двухступенчатого кодирования
-    cout << "Коэффициент сжатия RLE + LZW: " << static_cast<double>(input.length()) / encodedRLERLE.size() << endl;
+    cout << "Коэффициент сжатия RLE + LZW: " << static_cast<double>(input.length()) / encodedRLELZW.size() << endl;
     cout << "Коэффициент сжатия LZW + RLE: " << static_cast<double>(input.length()) / encodedLZWRLE.size() << endl;
 
     return 0;
