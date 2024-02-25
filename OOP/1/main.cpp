@@ -3,9 +3,11 @@
 #include <iostream>	// Эта - часть библиотеки STL (Standard Template Library)
 #include <limits>			// Полезные константы
 #include <conio.h>
+#include <climits>
+#include <cfloat>
 
 using namespace std;		// Обеспечивает видимость имен STL
-#define stop __asm nop// Эта макроподстановка упрощает установку точек останова
+#define stop asm("nop") // Эта макроподстановка упрощает установку точек останова
 
 int n;	 // Глобальная переменная. По умолчанию она обнуляется.
 
@@ -14,8 +16,7 @@ namespace space	 // В пространстве имен - space
 	int n = 1;	 // Объявлена переменная n
 }				 // space определяет область видимости этой переменной
 
-int  main()
-{
+int  main(){
 	// Выполняя программу по шагам, следите за значениями переменных  и интерпретируйте результат, объясняя себе
 	// наблюдаемые значения. Обратите внимание на разную интерпретацию отладчиком  signed и unsigned типов данных.
 	char c = 'A'; // 65 'A' 0x41 
@@ -291,22 +292,30 @@ int  main()
 	//	 Реалируйте 2 варианта этого алгоритма:   1. Используйте операторы if	 2. Используйте тернарные операции    ? :
 
 
-    // Вариант с использованием операторов if
-    for (double x = 0; x <= 3; x += 0.1) {
-        double y;
-        if (x <= 1)
-            y = 2;
-        else if (x <= 2)
-            y = f(x);
-        else
-            y = 0;
-        cout << "x = " << x << ", y = " << y << endl;
-    }
+	double x = 0;
+	double y;
+	while (x <= 4) {
+		if (x >= 0 && x <= 1) {
+			y = 0;
+		} else if (x > 1 && x <= 2) {
+			y = -2 + 2*x;
+		} else if (x > 2 && x <= 3) {
+			y = 6 - 2*x;
+		} else {
+			y = 0;
+		}
+		cout << "x = " << x << ", y = " << y << endl;
+		x += 0.1;
+	}
 
-    // Вариант с использованием тернарных операций
-    for (double x = 0; x <= 3; x += 0.1) {
-        double y = (x <= 1) ? 2 : ((x <= 2) ? f(x) : 0);
-        cout << "x = " << x << ", y = " << y << endl;
+	cout << endl;
+	x = 0;
+	while (x <= 4) {
+    y = (x >= 0 && x <= 1) ? 0 :
+        (x > 1 && x <= 2) ? -2 + 2*x:
+        (x > 2 && x <= 3) ? 6 - 2*x : 0;
+	cout << "x = " << x << ", y = " << y << endl;
+	x += 0.1;
     }
 
 
@@ -320,28 +329,32 @@ int  main()
 
     char input;
     int count = 0;
+	bool check = true;
 
-    for (;;) {
-        std::cin >> input;
+    while (check) {
+		cout << "Enter a character: " << endl;
+        cin >> input;
 
         switch (input) {
             case 'a':
-                std::cout << "\"Ok\"" << std::endl;
+                cout << "\"Ok\"" << endl;
                 break;
             case 'b':
-                std::cout << "\a" << std::endl; // Звуковой сигнал
+                cout << "\a" << endl;
                 break;
             case 'c':
-                std::cout << count << std::endl;
+                cout << count << endl;
                 break;
-            case 27: // ASCII код для Esc
-                std::cout << "to quit use 'q'" << std::endl;
+            case 27:
+                cout << "to quit use 'q'" << endl;
                 break;
             case 'q':
-                std::cout << "Bye" << std::endl;
-                return 0; // Выход из программы
+                cout << "Bye" << endl;
+                check = false;
+				break;
             default:
-                std::cout << "Invalid input" << std::endl;
+                cout << "Invalid input" << endl;
+				break;
         }
         
         count++;
@@ -371,4 +384,6 @@ int  main()
 
 	//	cout <<endl << hex << flags << endl<<dec<<flags;    
 	cout << "\n\n";
+
+	return 0;
 }	// Конец функции main()
