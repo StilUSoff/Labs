@@ -2,7 +2,6 @@
 #include <locale.h>	// функции, устанавливающие национальные кодировки символов
 #include <iostream>	// Эта - часть библиотеки STL (Standard Template Library)
 #include <limits>			// Полезные константы
-#include <conio.h>
 #include <climits>
 #include <cfloat>
 
@@ -328,12 +327,13 @@ int  main(){
 	//	символ 'q',   ваш алгоритм выводит  "Bye" и выходит из цикла ввода
 
     char input;
-    int count = 0;
+    int k = 0;
 	bool check = true;
 
     while (check) {
-		cout << "Enter a character: " << endl;
+		cout << "Enter chars: a, b, c, Esc (q to exit):" << endl;
         cin >> input;
+		k++;
 
         switch (input) {
             case 'a':
@@ -343,7 +343,7 @@ int  main(){
                 cout << "\a" << endl;
                 break;
             case 'c':
-                cout << count << endl;
+                cout << k << endl;
                 break;
             case 27:
                 cout << "to quit use 'q'" << endl;
@@ -357,7 +357,6 @@ int  main(){
 				break;
         }
         
-        count++;
     }
 
 	//	Побитовые операции:  |, &, ~, ^ и сдвиги >>, <<

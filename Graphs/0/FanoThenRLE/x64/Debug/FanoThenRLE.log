@@ -1,0 +1,3 @@
+﻿  FanoThenRLE.cpp
+C:\Users\1\source\repos\FanoThenRLE\FanoThenRLE.cpp(157,15): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+  FanoThenRLE.vcxproj -> C:\Users\1\source\repos\FanoThenRLE\x64\Debug\FanoThenRLE.exe
