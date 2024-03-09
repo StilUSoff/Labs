@@ -1,7 +1,7 @@
 ﻿#include <cmath>			// математические функции
 #include <locale.h>	// функции, устанавливающие национальные кодировки символов
 #include <iostream>	// Эта - часть библиотеки STL (Standard Template Library)
-#include <limits>
+#include <limits.h>
 #include <cfloat>			// Полезные константы
 
 using namespace std;		// Обеспечивает видимость имен STL
