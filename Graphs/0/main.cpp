@@ -6,7 +6,6 @@
 #include <map>
 #include <fstream>
 
-
 using namespace std;
 
 void generateFile(const string& file_name, const string& orig_text) {
@@ -176,94 +175,82 @@ int main() {
 
     // 1
 
-    // string fano = Fano_Encode(orig_text, codes);
-    // file_name = "txt/Solo_Fano_Encode.txt";
-    // generateFile(file_name, fano);
+    string fano = Fano_Encode(orig_text, codes);
+    file_name = "txt/Solo_Fano_Encode.txt";
+    generateFile(file_name, fano);
 
-    // string fano_de = Fano_Decode(root, fano);
-    // file_name = "txt/Solo_Fano_Decoded.txt";
-    // generateFile(file_name, fano_de);
+    string fano_de = Fano_Decode(root, fano);
+    file_name = "txt/Solo_Fano_Decoded.txt";
+    generateFile(file_name, fano_de);
 
-    // if (orig_text == fano_de) {
-    //     cout << "Fano Success" << endl;
-    // }
-    // else {
-    //     cout << "Fano Failed" << endl;
-    // }
+    if (orig_text == fano_de) {
+        cout << "FANO Success" << endl;
+    }
+    else {
+        cout << "FANO Failed" << endl;
+    }
 
-    // // 2
+    // 2
 
-    // string rle = RLE_Encode(orig_text);
-    // file_name = "txt/Solo_RLE_Encode.txt";
-    // generateFile(file_name, fano);
+    string rle = RLE_Encode(orig_text);
+    file_name = "txt/Solo_RLE_Encode.txt";
+    generateFile(file_name, fano);
 
-    // string rle_de = RLE_Decode(rle);
-    // file_name = "txt/Solo_RLE_Decoded.txt";
-    // generateFile(file_name, fano_de);
+    string rle_de = RLE_Decode(rle);
+    file_name = "txt/Solo_RLE_Decoded.txt";
+    generateFile(file_name, fano_de);
 
-    // if (orig_text == rle_de) {
-    //     cout << "RLE Success" << endl;
-    // }
-    // else {
-    //     cout << "RLE Failed" << endl;
-    // }
+    if (orig_text == rle_de) {
+        cout << "RLE Success" << endl;
+    }
+    else {
+        cout << "RLE Failed" << endl;
+    }
 
-    // // 3
+    // 3
 
-    // // FANO+RLE
+    // RLE+Fano
 
-    // string rle_encoded = RLE_Encode(orig_text);
-    // file_name = "txt/F_R_RLE_Encode.txt";
-    // generateFile(file_name, rle_encoded);
+    string rle_encoded = RLE_Encode(orig_text);
+    file_name = "txt/R_F_RLE_Encode.txt";
+    generateFile(file_name, rle_encoded);
 
-    // string fano_rle_encoded = Fano_Encode(rle_encoded, codes);
-    // file_name = "txt/F_R_full_Encode.txt";
-    // generateFile(file_name, fano_rle_encoded);
+    string fano_rle_encoded = Fano_Encode(rle_encoded, codes);
+    file_name = "txt/R_F_full_Encode.txt";
+    generateFile(file_name, fano_rle_encoded);
 
-    // string fano_decoded = Fano_Decode(root, fano_rle_encoded);
-    // string fano_rle_decoded = RLE_Decode(fano_decoded);
-    // file_name = "txt/Fano_RLE_Decoded.txt";
-    // generateFile(file_name, fano_rle_decoded);
+    string fano_decoded = Fano_Decode(root, fano_rle_encoded);
+    string fano_rle_decoded = RLE_Decode(fano_decoded);
+    file_name = "txt/RLE_FANO_Decoded.txt";
+    generateFile(file_name, fano_rle_decoded);
 
-    // if (orig_text == fano_rle_decoded) {
-    //     cout << "Fano+RLE Success" << endl;
-    // }
-    // else {
-    //     cout << "Fano+RLE Failed" << endl;
-    // }
+    if (orig_text == fano_rle_decoded) {
+        cout << "RLE+FANO Success" << endl;
+    }
+    else {
+        cout << "RLE+FANO Failed" << endl;
+    }
 
-    // RLE+FANO
+    // Fano+RLE
 
     string fano_encoded = Fano_Encode(orig_text, codes);
-    file_name = "txt/R_F_Fano_Encode.txt";
+    file_name = "txt/F_R_Fano_Encode.txt";
     generateFile(file_name, fano_encoded);
 
     string rle_fano_encoded = RLE_Encode(fano_encoded);
-    file_name = "txt/R_F_full_Encode.txt";
+    file_name = "txt/F_R_full_Encode.txt";
     generateFile(file_name, rle_fano_encoded);
 
     string rle_decoded = RLE_Decode(rle_fano_encoded);
-
-
-
-
-
-    file_name = "txt/R_F_RLE_decode.txt";
-    generateFile(file_name, rle_decoded);
-
-
-
-
-
-    string rle_fano_decoded = Fano_Decode(root, rle_decoded);
-    file_name = "txt/RLE_Fano_Decoded.txt";
+    string rle_fano_decoded = Fano_Decode(root, fano_encoded);
+    file_name = "txt/FANO_RLE_Decoded.txt";
     generateFile(file_name, rle_fano_decoded);
 
     if (orig_text == rle_fano_decoded) {
-        cout << "RLE+Fano Success" << endl;
+        cout << "FANO+RLE Success" << endl;
     }
     else {
-        cout << "RLE+Fano Failed" << endl;
+        cout << "FANO+RLE Failed" << endl;
     }
 
     return 0;
