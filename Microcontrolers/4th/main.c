@@ -34,34 +34,27 @@ int main ()
 {
 	RCC->AHB1ENR |= 1ul<<6; // Enable port G clocking
 	RCC->APB2ENR|= 1ul<<14; //SYSCFGEN
-	SCB->SCR |= 1ul<<2;//перевели в deepsleed
+	SCB->SCR |= 1ul<<2;
 
 	GPIOG->MODER = (GPIOG->MODER & ~(1ul<<13)) | 1ul<<12;//PG6
 	GPIOG->MODER = (GPIOG->MODER & ~(1ul<<15)) | 1ul<<14;//PG7
 	GPIOA->MODER = (GPIOA->MODER & ~(1ul<<1)) & ~(1ul);//PA0
 
-	EXTI->IMR|=EXTI_IMR_MR0; //зарезервировали две линии под прерывания (сконфигурировали маскирующие биты...)
+	EXTI->IMR|=EXTI_IMR_MR0;
 	EXTI->RTSR|= EXTI_RTSR_TR0; //Rise Signal
 	EXTI->FTSR|= EXTI_FTSR_TR0; //Fall Signal
 
-	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA; //прикрепили pa0 к зарезарвированной линии	
+	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA; 
 
-	NVIC_SetPriority(6,5); //(номер в таблице векторов прерываний(тип), приоритет)
+	NVIC_SetPriority(6,5); 
 
-	NVIC_EnableIRQ(6); //активировали прерывание
+	NVIC_EnableIRQ(6);
 
-	RCC->APB1ENR|=RCC_APB1ENR_TIM6EN;//включили тактовый сигнал дя tim6
+	RCC->APB1ENR|=RCC_APB1ENR_TIM6EN;
 
-// Разрешаем таймеру генерацию прерываний
-// (по умолчанию, после сброса бит TIM_CR1_URS сброшен в 0
-// и прерывание генерируется как при переполнении счётчика,
-// так и при установке бита TIM_EGR_UG).
 
 	TIM6->DIER|=TIM_DIER_UIE;
 
-// При выполнении следующей строки генерируется прерывание
-// (при этом сам таймер пока ещё остановлен: бит включения
-// счёта TIM_CR1_CEN сброшен в 0).
 
 	TIM6->EGR|=TIM_EGR_UG;
 

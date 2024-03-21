@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void generateFile(const string& file_name, const string& orig_text) {
+void generateFile(const string &file_name, const string &orig_text) {
 	ofstream file;
 	file.open(file_name);
 	file << orig_text;
@@ -33,7 +33,7 @@ bool compareNodes(const Node* a, const Node* b) {
     return a->frequency > b->frequency;
 }
 // Построение дерева
-Node* buildHuffmanTree(vector<Node*>& nodes) {
+Node* buildHuffmanTree(vector<Node*> &nodes) {
     while (nodes.size() > 1) {
         sort(nodes.begin(), nodes.end(), compareNodes);
 
@@ -50,7 +50,7 @@ Node* buildHuffmanTree(vector<Node*>& nodes) {
     return nodes[0];
 }
 // Коды 
-void generateCodes(Node* root, string code, map<char, string>& codes) {
+void generateCodes(Node* root, string code, map<char, string> &codes) {
     if (root == nullptr) {
         return;
     }
@@ -63,14 +63,14 @@ void generateCodes(Node* root, string code, map<char, string>& codes) {
     generateCodes(root->right, code + "1", codes);
 }
 // Таблица кодов
-void printCodeTable(const map<char, string>& codes) {
+void printCodeTable(const map<char, string> &codes) {
     cout << "Code Table:" << endl;
     for (const auto& pair : codes) {
         cout << pair.first << ": " << pair.second << endl;
     }
 }
 // Кодируем код
-string Fano_Encode(const string& text, const map<char, string>& codes) {
+string Fano_Encode(const string &text, const map<char, string> &codes) {
     string encodedText = "";
 
     for (char c : text) {
@@ -80,7 +80,7 @@ string Fano_Encode(const string& text, const map<char, string>& codes) {
     return encodedText;
 }
 // Декодируем код
-string Fano_Decode(Node* root, const string& encodedText) {
+string Fano_Decode(Node* root, const string &encodedText) {
     string decodedText = "";
 
     Node* current = root;
@@ -103,10 +103,10 @@ string Fano_Decode(Node* root, const string& encodedText) {
 }
 
 // Функция для сжатия строки с использованием алгоритма RLE
-static string RLE_Encode(const string& orig_text) {
+string RLE_Encode(const string &orig_text) {
     string encoded;
 
-    for (int i = 0; i < orig_text.length(); i++) {
+    for (int i = 0; i < orig_text.length(); ++i) {
         int count = 1;
 
         while (static_cast<unsigned long long>(i) + 1 < orig_text.length() && orig_text[i] == orig_text[static_cast<basic_string<char, char_traits<char>, allocator<char>>::size_type>(i) + 1]) {
@@ -122,14 +122,14 @@ static string RLE_Encode(const string& orig_text) {
 }
 
 // Функция для декодирования строки, сжатой с помощью алгоритма RLE
-string RLE_Decode(const string& orig_text) {
+string RLE_Decode(const string &orig_text) {
     string decoded;
 
     for (int i = 0; i < orig_text.length(); i += 2) {
         char symbol = orig_text[i];
         int count = orig_text[i + 1] - '0';
 
-        for (int j = 0; j < count; j++) {
+        for (int j = 0; j < count; ++j) {
             decoded += symbol;
         }
     }
