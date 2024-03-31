@@ -14,7 +14,7 @@ void EXTI0_IRQHandler(void)
   GPIOG->ODR &= ~1ul<<6;
   delay ();
   
-  â€‹EXTI->PR|=EXTI_PR_PR0;
+  EXTI->PR|=EXTI_PR_PR0;
 }
  
 void EXTI15_10_IRQHandler(void)
@@ -24,39 +24,39 @@ void EXTI15_10_IRQHandler(void)
   GPIOG->ODR &= ~1ul<<8;
   delay ();
   
-  â€‹EXTI->PR|=EXTI_PR_PR0;
+  EXTI->PR|=EXTI_PR_PR0;
 }
  
  
 int main ()
   {
-  RCC->AHB1ENR |= 1ul<<6; // Enable port G clocking
-  RCC->APB2ENR|= 1ul<<14; //SYSCFGEN
-  â€‹
+    RCC->AHB1ENR |= 1ul<<6; // Enable port G clocking
+    RCC->APB2ENR|= 1ul<<14; //SYSCFGEN
+  
   GPIOG->MODER = (GPIOG->MODER & ~(1ul<<13)) | 1ul<<12;//PG6
   GPIOG->MODER = (GPIOG->MODER & ~(1ul<<15)) | 1ul<<14;//PG7
   GPIOG->MODER = (GPIOG->MODER & ~(1ul<<17)) | 1ul<<16;//PG8
   
   GPIOG->MODER = (GPIOG->MODER & ~(1ul<<31)) & ~(1ul<<30);//PG15
   GPIOA->MODER = (GPIOA->MODER & ~(1ul<<1)) & ~(1ul);//PA0
-  â€‹
+  
   EXTI->IMR|=EXTI_IMR_MR0|EXTI_IMR_MR15;
-  //Ð·Ð°Ñ€ÐµÐ·ÐµÑ€Ð²Ð¸Ñ€Ð¾Ð²Ð°Ð»Ð¸ Ð´Ð²Ðµ Ð»Ð¸Ð½Ð¸Ð¸ Ð¿Ð¾Ð´ Ð¿Ñ€ÐµÑ€Ñ‹Ð²Ð°Ð½Ð¸Ñ (ÑÐºÐ¾Ð½Ñ„Ð¸Ð³ÑƒÑ€Ð¸Ñ€Ð¾Ð²Ð°Ð»Ð¸ Ð¼Ð°ÑÐºÐ¸Ñ€ÑƒÑŽÑ‰Ð¸Ðµ Ð±Ð¸Ñ‚Ñ‹...)
+  //çàðåçåðâèðîâàëè äâå ëèíèè ïîä ïðåðûâàíèÿ (ñêîíôèãóðèðîâàëè ìàñêèðóþùèå áèòû...)
   
   EXTI->RTSR|= EXTI_RTSR_TR0; //Rise Signal
   EXTI->FTSR|=EXTI_FTSR_TR15; //Fall Signal
-  â€‹
+  
   SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA;
-  //Ð¿Ñ€Ð¸ÐºÑ€ÐµÐ¿Ð¸Ð»Ð¸ pa0 Ðº Ð·Ð°Ñ€ÐµÐ·Ð°Ñ€Ð²Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ð¾Ð¹ Ð»Ð¸Ð½Ð¸Ð¸
-  â€‹
+  //ïðèêðåïèëè pa0 ê çàðåçàðâèðîâàííîé ëèíèè
+  
   SYSCFG->EXTICR[3] |= SYSCFG_EXTICR4_EXTI15_PG;
-  â€‹
-  NVIC_SetPriority(6,5); //(Ð½Ð¾Ð¼ÐµÑ€ Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ðµ Ð²ÐµÐºÑ‚Ð¾Ñ€Ð¾Ð² Ð¿Ñ€ÐµÑ€Ñ‹Ð²Ð°Ð½Ð¸Ð¹(Ñ‚Ð¸Ð¿), Ð¿Ñ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚)
+  
+  NVIC_SetPriority(6,5); //(íîìåð â òàáëèöå âåêòîðîâ ïðåðûâàíèé(òèï), ïðèîðèòåò)
   NVIC_SetPriority(40,6);
-  â€‹
-  NVIC_EnableIRQ(6); //Ð°ÐºÑ‚Ð¸Ð²Ð¸Ñ€Ð¾Ð²Ð°Ð»Ð¸ Ð¿Ñ€ÐµÑ€Ñ‹Ð²Ð°Ð½Ð¸Ðµ
+  
+  NVIC_EnableIRQ(6); //àêòèâèðîâàëè ïðåðûâàíèå
   NVIC_EnableIRQ(40);
-  â€‹
+  
   for (;;)
   {
     GPIOG->ODR |= 1ul<<7;
